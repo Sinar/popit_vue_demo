@@ -25,18 +25,24 @@
               </md-card-expand-content>
           </md-card-expand>
       </md-card>
+      <p></p>
+      <vue-paginate-al :totalPage="total" @btnClick="setPage"></vue-paginate-al>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import VuePaginateAl from 'vue-paginate-al'
 
 export default {
   name: 'Persons',
   data () {
     return {
       results: [],
-      errors: []
+      errors: [],
+      total: 0,
+      page: 1,
+      perPage: 10
     }
   },
   created () {
@@ -44,10 +50,38 @@ export default {
     axios.get('https://api.popit.sinarproject.org/en/persons/')
       .then(response => {
         this.results = response.data.results
+        this.total = response.data.total
+        this.perPage = response.data.per_page
       })
       .catch(e => {
         this.errors.push(e)
       })
+  },
+  methods: {
+    setPage: function (page) {
+      this.page = page
+      this.fetchPersons(page)
+    },
+    fetchPersons: function (page) {
+      console.log(page)
+      axios.get('https://api.popit.sinarproject.org/en/persons/', {
+        params: {
+          page: page
+        }
+      })
+        .then(response => {
+          this.results = response.data.results
+          this.total = response.data.total
+          this.perPage = response.data.per_page
+          this.page = page
+        })
+        .catch(e => {
+          this.errors.push(e)
+        })
+    }
+  },
+  components: {
+    VuePaginateAl
   }
 }
 </script>
